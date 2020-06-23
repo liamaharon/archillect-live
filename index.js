@@ -39,12 +39,11 @@ async function updatePost() {
       url: 'https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=archillect&count=1',
       headers: { Authorization: `Bearer ${token}` },
     })
-    const mediaType = latestPostRes.data[0].entities.media[0].type
     const thisPostTime = latestPostRes.data[0].created_at
-    if (mediaType !== 'photo' && thisPostTime !== lastPostTime) {
+    const mediaUrl = latestPostRes.data[0].entities.media[0].media_url_https
+    if (!mediaUrl.includes('video') && thisPostTime !== lastPostTime) {
       lastPostTime = thisPostTime
       console.log('Updating!')
-      const mediaUrl = latestPostRes.data[0].entities.media[0].media_url_https
       await axios({
         method: 'get',
         url: mediaUrl,
@@ -60,7 +59,7 @@ async function updatePost() {
     console.log('Failed to fetch latest post')
     console.log(error)
   } finally {
-    setTimeout(updatePost, 1000 * 5)
+    setTimeout(updatePost, 1000 * 15)
   }
 }
 
