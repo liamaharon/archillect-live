@@ -39,19 +39,18 @@ async function updatePost() {
       url: 'https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=archillect&count=1',
       headers: { Authorization: `Bearer ${token}` },
     })
+    const mediaType = latestPostRes.data[0].entities.media[0].type
     const thisPostTime = latestPostRes.data[0].created_at
-    if (thisPostTime !== lastPostTime) {
+    if (mediaType !== 'photo' && thisPostTime !== lastPostTime) {
       lastPostTime = thisPostTime
       console.log('Updating!')
       const mediaUrl = latestPostRes.data[0].entities.media[0].media_url_https
-      const mediaType = latestPostRes.data[0].entities.media[0].type
-      const fileName = mediaType === 'photo' ? 'latest.jpg' : 'latest.gif'
       await axios({
         method: 'get',
         url: mediaUrl,
         responseType: 'stream',
       }).then((response) => {
-        response.data.pipe(fs.createWriteStream(`${__dirname}/${fileName}`))
+        response.data.pipe(fs.createWriteStream(`${__dirname}/latest.jpg`))
       })
       await new Promise(r => setTimeout(r, 2000))
       if (child) console.log(child.kill())
