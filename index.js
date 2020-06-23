@@ -1,5 +1,5 @@
 const fs = require('fs')
-const open = require('open')
+const { spawn } = require('child_process')
 const axios = require('axios')
 const querystring = require('querystring')
 
@@ -8,6 +8,7 @@ const API_SECRET_KEY = process.env.TWITTER_API_SECRET_KEY
 
 let token = null
 let lastPostTime = null
+let child = null
 
 async function authenticate() {
   console.log('Authenticating')
@@ -52,13 +53,15 @@ async function updatePost() {
       }).then((response) => {
         response.data.pipe(fs.createWriteStream(`${__dirname}/${fileName}`))
       })
-      await open(`${__dirname}/${fileName}`)
+      await new Promise(r => setTimeout(r, 2000))
+      if (child) console.log(child.kill())
+      child = spawn('feh', ['-xFZ'])
     }
   } catch (error) {
     console.log('Failed to fetch latest post')
     console.log(error)
   } finally {
-    setTimeout(updatePost, 1000 * 10)
+    setTimeout(updatePost, 1000 * 5)
   }
 }
 
